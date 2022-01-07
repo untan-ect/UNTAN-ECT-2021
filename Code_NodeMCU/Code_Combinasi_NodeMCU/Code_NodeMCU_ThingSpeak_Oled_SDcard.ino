@@ -194,7 +194,6 @@ void Thingspeak(){
 
 void displayTemp() {
   display.clearDisplay();
-  display.display();
 
   //Menampilkan data di LCD Oled
   display.setTextSize(1);
@@ -209,14 +208,10 @@ void displayTemp() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,16);
   display.println("V");
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
   display.setCursor(8,16);
   display.println(":");
   display.setCursor(16,16);
-  display.setTextSize(1);
-  display.print(V, 1);
-  display.display();
+  display.print(V);
 
   //Kolom 1 Baris 4
   //Menampilkan nilai variabel I di LCD Oled
@@ -224,14 +219,10 @@ void displayTemp() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,28);
   display.println("I");
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
   display.setCursor(8,28);
   display.println(":");
   display.setCursor(16,28);
-  display.setTextSize(1);
-  display.print(I, 1);
-  display.display();
+  display.print(I);
 
   //Kolom 1 Baris 5
   //Menampilkan nilai variabel P di LCD Oled
@@ -239,14 +230,10 @@ void displayTemp() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,40);
   display.println("P");
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
   display.setCursor(8,40);
   display.println(":");
   display.setCursor(16,40);
-  display.setTextSize(1);
-  display.print(P, 1);
-  display.display();
+  display.print(P);
 
   //Kolom 2 Baris 3
   //Menampilkan nilai variabel T di LCD Oled
@@ -254,14 +241,10 @@ void displayTemp() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(70,16);
   display.println("T");
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
   display.setCursor(78,16);
   display.println(":");
   display.setCursor(86,16);
-  display.setTextSize(1);
-  display.print(T, 1);
-  display.display();
+  display.print(T);
 
   //Kolom 2 Baris 4
   //Menampilkan nilai variabel v di LCD Oled
@@ -269,14 +252,10 @@ void displayTemp() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(70,28);
   display.println("v");
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
   display.setCursor(78,28);
   display.println(":");
   display.setCursor(86,28);
-  display.setTextSize(1);
-  display.print(v, 1);
-  display.display();
+  display.print(v);
 
   //Kolom 2 Baris 5
   //Menampilkan nilai variabel E di LCD Oled
@@ -284,13 +263,9 @@ void displayTemp() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(70,40);
   display.println("E");
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
   display.setCursor(78,40);
   display.println(":");
   display.setCursor(86,40);
-  display.setTextSize(1);
-  display.print(E, 1);
-  display.display();
+  display.print(E);
   delay(100);
 }
