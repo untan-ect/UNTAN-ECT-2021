@@ -1,3 +1,5 @@
+#include <SPI.h> 
+#include <SD.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
@@ -17,6 +19,10 @@ WiFiClient client;
 // Deklarasi untuk SSD1306 display terhubung ke I2C (pin SDA dan SCL)
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+//Deklarasi untuk pin pada SD Card
+#define CS_PIN D8 //Medenefisikan variabel CS_PIN pada pin D8 di NodeMCU
+File dataFile; //Mendeklarasikan variabel dataFile pada tipe File atau Dokumen
 
 char token[]           = "BBFF-lJhOBUcVPa4rnl2Hxnf5DLPHJZUnqX";
 char ssid[]            = "Redmi Not 8";
@@ -64,6 +70,13 @@ void setup() {
   Serial.begin(115200);
   mySerial.begin(115200);
   delay(300);
+  
+  JikaWiFiTerhubung = WiFi.onStationModeGotIP(WiFi_Terhubung);
+  JikaWiFiTerputus  = WiFi.onStationModeDisconnected(WiFi_Terputus);
+
+  ubidots.setDebug(true);
+  ubidots.begin(callback);
+  delay(500);
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x64
     Serial.println(F("SSD1306 allocation failed"));
@@ -73,13 +86,45 @@ void setup() {
   // Clear the buffer
   display.clearDisplay();
   display.display();
+  delay(100);
+  
+  //Menghubungkan SD Card ke NodeMCU
+  Serial.println("Inisialisasi SD CARD..."); //Menampilkan diserial kata "Inisialisasi SD CARD..." di serial monitor laptop
 
-  JikaWiFiTerhubung = WiFi.onStationModeGotIP(WiFi_Terhubung);
-  JikaWiFiTerputus  = WiFi.onStationModeDisconnected(WiFi_Terputus);
+  //Periksa apakah kartu SD ada dan dapat diinisialisasi
+  if (!SD.begin(CS_PIN)) {
+    Serial.println("Gagal, cek apakah SD card terhubung."); //Menampilkan diserial kata "Gagal, cek apakah SD card terhubung." di serial monitor laptop
+    return;
+  }
+   
+  // jika Anda sampai di sini, itu karena kartu diinisialisasi dengan benar
+  Serial.println("Inisialisasi kartu."); //Menampilkan kata "Inisialisasi kartu." pada serial monitor laptop
 
-  ubidots.setDebug(true);
-  ubidots.begin(callback);
-  delay(500);
+  dataFile = SD.open("Data Mobil.xls", FILE_WRITE); //Menjadikan variabel dataFile sebagai alat untuk membuat file dan membuka file di SD card 
+  // jika file dibuka dengan benar, tulis datanya
+  if (dataFile) { 
+      //Mecetak kata-kata pada file yang dibuat di SD card
+      dataFile.print("Tegangan"); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print("Arus"); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print("Daya"); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print("Temperature"); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print("Kecepatan"); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print("Energi"); 
+      dataFile.println("");
+ 
+      //menutup file setelah menggunakannya
+      dataFile.close();
+  }
+  // jika file tidak dapat dibuka, data tidak akan ditulis.
+  else {
+    Serial.println("Gagal membuka file Data Mobil.xls"); //Menampilkan kata "Gagal membuka  file NilaiPot.xls" diserial monitor laptop
+  }
+
 }
 
 void loop() {
@@ -99,9 +144,9 @@ void loop() {
       I = Data[1].toFloat();
       P = Data[2].toFloat();
       T = Data[3].toFloat();
-      v = Data[4].toInt();
+      v = Data[4].toFloat();
       W = Data[5].toFloat();
-      E = Data[6].toInt();
+      E = Data[6].toFloat();
 
       PesanData = "";
       Serial.println("Volt    : " + Data[0] + "V      \t||\t " + "Arus   : " + Data[1] + "A");
@@ -126,6 +171,10 @@ void loop() {
     displayOLED();
     sets(3);
   }
+  if(Time(4, 1)) {
+    SD_card();
+    sets(4);
+  }
 }
 
 String getValue(String data, char separator, int index) {
@@ -140,6 +189,37 @@ String getValue(String data, char separator, int index) {
     }
   }
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+  
+void SD_card(){
+  dataFile = SD.open("Data Mobil.xls", FILE_WRITE); //Menjadikan variabel dataFile sebagai alat untuk membuat file dan membuka file di SD card 
+  // jika file dibuka dengan benar, tulis datanya
+  if (dataFile) {      
+      Serial.println("File Data Mobil.xls Berhasil Dibuka."); //Menampilkan diserial kata "File Nilaipot.xls Berhasil Dibuka."
+      //Mecetak nilai variabel pada file yang dibuat di SD card
+      dataFile.print(V);
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print(I);
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print(P); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print(T); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print(v); 
+      dataFile.print("\t\t"); //Tab 2 kali
+      dataFile.print(E);
+      dataFile.println("");
+ 
+  //menutup file setelah menggunakannya
+      dataFile.close();
+      delay(1000);
+  }
+  // jika file tidak dapat dibuka, data tidak akan ditulis.
+  else {
+    Serial.println("Gagal membuka file Data Mobil.xls"); //Menampilkan kata "Gagal membuka  file NilaiPot.xls" diserial monitor laptop
+  }
+   //menunggu interval untuk pembacaan baru dari data
+  delay(200);
 }
 
 void displayOLED() {
